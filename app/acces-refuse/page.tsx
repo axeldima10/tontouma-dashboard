@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
-import { Aurora } from "@/components/shell/Aurora";
-import { ForbiddenState } from "@/components/states";
+import { ForbiddenState } from "@/components/states/States";
 
 export const metadata: Metadata = { title: "Accès refusé" };
 
@@ -8,7 +7,6 @@ export const metadata: Metadata = { title: "Accès refusé" };
 export default function AccessDeniedPage() {
   return (
     <main className="grid min-h-dvh place-items-center px-4 py-10">
-      <Aurora />
       <ForbiddenState reason="platform" backHref="/dashboard" />
     </main>
   );

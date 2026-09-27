@@ -1,4 +1,4 @@
-import { NotFoundState } from "@/components/states";
+import { NotFoundState } from "@/components/states/States";
 
 export default function AdminNotFound() {
   return <NotFoundState backHref="/admin" />;

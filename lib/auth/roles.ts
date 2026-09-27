@@ -6,8 +6,8 @@ export const ORG_ROLES = {
 
 export type OrgRole = (typeof ORG_ROLES)[keyof typeof ORG_ROLES];
 
-/** Valeur de la claim `platform_role` (métadonnées publiques Clerk) du personnel Tontouma. */
-export const PLATFORM_ADMIN_ROLE = "admin";
+/** Valeur de la claim `platform_role` = `{{user.public_metadata.role}}` : même rôle que celui lu par le backend. */
+export const PLATFORM_ADMIN_ROLE = "SUPER_ADMIN";
 
 export const ROLE_LABELS: Record<OrgRole, string> = {
   "org:super_admin": "Super administrateur",

@@ -1,16 +1,16 @@
 import type { Metadata, Viewport } from "next";
-import { Inter, Space_Grotesk } from "next/font/google";
+import { Urbanist } from "next/font/google";
 import { ClerkProvider } from "@clerk/nextjs";
 import { frFR } from "@clerk/localizations";
 import { cookies } from "next/headers";
 import { DevPersonaSwitcher } from "@/components/auth/DevPersonaSwitcher";
+import { Backdrop } from "@/components/shell/Backdrop";
 import { isDevAuth } from "@/lib/auth/mode";
 import { PERSONA_COOKIE, toPersonaId } from "@/lib/auth/personas";
 import { themeInitScript } from "@/lib/theme";
 import "./globals.css";
 
-const inter = Inter({ variable: "--font-inter", subsets: ["latin"], display: "swap" });
-const spaceGrotesk = Space_Grotesk({ variable: "--font-space-grotesk", subsets: ["latin"], display: "swap" });
+const urbanist = Urbanist({ variable: "--font-urbanist", subsets: ["latin"], display: "swap" });
 
 export const metadata: Metadata = {
   title: { default: "Tontouma Bot — Administration", template: "%s · Tontouma Bot" },
@@ -20,8 +20,8 @@ export const metadata: Metadata = {
 
 export const viewport: Viewport = {
   themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#f4f8f6" },
-    { media: "(prefers-color-scheme: dark)", color: "#07110d" },
+    { media: "(prefers-color-scheme: light)", color: "#e9f1ef" },
+    { media: "(prefers-color-scheme: dark)", color: "#0b171a" },
   ],
 };
 
@@ -29,21 +29,21 @@ export const viewport: Viewport = {
 const clerkAppearance = {
   cssLayerName: "clerk",
   variables: {
-    colorPrimary: "var(--green)",
-    colorPrimaryForeground: "var(--on-green)",
-    colorBackground: "var(--panel)",
-    colorForeground: "var(--text)",
-    colorMutedForeground: "var(--muted)",
-    colorMuted: "var(--surface-3)",
-    colorInput: "var(--surface-2)",
-    colorInputForeground: "var(--text)",
-    colorBorder: "var(--line-strong)",
-    colorNeutral: "var(--text)",
-    colorDanger: "var(--danger)",
+    colorPrimary: "var(--primary)",
+    colorPrimaryForeground: "var(--primary-foreground)",
+    colorBackground: "var(--card)",
+    colorForeground: "var(--foreground)",
+    colorMutedForeground: "var(--muted-foreground)",
+    colorMuted: "var(--muted)",
+    colorInput: "var(--card)",
+    colorInputForeground: "var(--foreground)",
+    colorBorder: "var(--border-strong)",
+    colorNeutral: "var(--foreground)",
+    colorDanger: "var(--destructive)",
     colorRing: "var(--ring)",
-    colorModalBackdrop: "color-mix(in srgb, var(--bg) 60%, transparent)",
-    fontFamily: "var(--font-inter)",
-    borderRadius: "0.75rem",
+    colorModalBackdrop: "color-mix(in srgb, var(--bg-3) 50%, transparent)",
+    fontFamily: "var(--font-urbanist)",
+    borderRadius: "0.9rem",
   },
 };
 
@@ -52,15 +52,12 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
   const persona = devAuth ? toPersonaId((await cookies()).get(PERSONA_COOKIE)?.value) : null;
 
   return (
-    <html
-      lang="fr"
-      suppressHydrationWarning
-      className={`${inter.variable} ${spaceGrotesk.variable} h-full antialiased`}
-    >
+    <html lang="fr" suppressHydrationWarning className={`${urbanist.variable} h-full antialiased`}>
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
       </head>
       <body className="min-h-full">
+        <Backdrop />
         {persona ? (
           <>
             {children}

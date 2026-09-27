@@ -1,5 +1,5 @@
-import { PageTransition } from "@/lib/motion/PageTransition";
+import { PageTransition } from "@/components/motion/Motion";
 
-export default function OrgTemplate({ children }: { children: React.ReactNode }) {
+export default function Template({ children }: { children: React.ReactNode }) {
   return <PageTransition>{children}</PageTransition>;
 }

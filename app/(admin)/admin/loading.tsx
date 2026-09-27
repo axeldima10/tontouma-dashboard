@@ -1,5 +1,5 @@
-import { GenericPageSkeleton } from "@/components/overview/OverviewSkeleton";
+import { PageSkeleton } from "@/components/ui/Skeleton";
 
 export default function Loading() {
-  return <GenericPageSkeleton />;
+  return <PageSkeleton />;
 }
