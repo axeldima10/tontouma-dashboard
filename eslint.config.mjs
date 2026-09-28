@@ -12,6 +12,10 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Skills d'agents : modèles de code tiers, hors application.
+    ".agents/**",
+    ".claude/**",
+    ".devin/**",
   ]),
 ]);
 

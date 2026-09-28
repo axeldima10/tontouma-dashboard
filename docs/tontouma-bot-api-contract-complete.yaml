@@ -1,0 +1,3039 @@
+openapi: 3.0.3
+info:
+  title: Tontouma Bot — API complète (Backend Spring)
+  version: 1.0.0
+  description: Contrat complet de l'application. Voir aussi tontouma-bot-priority-us-contract.yaml pour le sous-ensemble des 5 US prioritaires.
+servers:
+- url: https://api.tontoumabot.sn/api/v1
+  description: Production (à confirmer)
+- url: http://localhost:8080/api/v1
+  description: Développement local
+security:
+- clerkAuth: []
+components:
+  securitySchemes:
+    clerkAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: 'Header: Authorization: Bearer <token Clerk>. Absent sur /public/... et /access-ticket.'
+  schemas:
+    Error:
+      type: object
+      properties:
+        error:
+          type: object
+          properties:
+            code:
+              type: string
+            message:
+              type: string
+    Organization:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        clerk_org_id:
+          type: string
+        nom:
+          type: string
+        type:
+          type: string
+        description:
+          type: string
+        adresse:
+          type: string
+        telephone:
+          type: string
+        email:
+          type: string
+        siteWeb:
+          type: string
+        logo_url:
+          type: string
+          format: uri
+          nullable: true
+        statut:
+          type: string
+          enum:
+          - active
+          - suspendue
+        dateCreation:
+          type: string
+          format: date-time
+    DemandeAccesOrganisation:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        nomOrganisation:
+          type: string
+        emailContact:
+          type: string
+        telephoneContact:
+          type: string
+        message:
+          type: string
+        statut:
+          type: string
+          enum:
+          - en_attente
+          - approuvee
+          - rejetee
+        dateDemande:
+          type: string
+          format: date-time
+    InvitationOrganisation:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        organisation_id:
+          type: string
+          format: uuid
+        email:
+          type: string
+        token:
+          type: string
+        statut:
+          type: string
+          enum:
+          - envoyee
+          - acceptee
+          - expiree
+        dateExpiration:
+          type: string
+          format: date-time
+    AuthenticatedUser:
+      type: object
+      properties:
+        clerk_user_id:
+          type: string
+        role:
+          type: string
+          enum:
+          - super_admin
+          - admin
+        organization:
+          $ref: '#/components/schemas/Organization'
+    AccessResolution:
+      type: object
+      properties:
+        session_id:
+          type: string
+        organization:
+          $ref: '#/components/schemas/Organization'
+    Departement:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        organization_id:
+          type: string
+          format: uuid
+        nom:
+          type: string
+        description:
+          type: string
+        ordre:
+          type: integer
+        statut:
+          type: string
+          enum:
+          - actif
+          - inactif
+    ServiceOffering:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        departement_id:
+          type: string
+          format: uuid
+          nullable: true
+        organization_id:
+          type: string
+          format: uuid
+        nom:
+          type: string
+        description:
+          type: string
+        localisation:
+          type: string
+        telephone:
+          type: string
+        email:
+          type: string
+        horaires:
+          type: string
+        description_orientation:
+          type: string
+          nullable: true
+          example: Couloir central, première porte à droite
+        ordre:
+          type: integer
+        statut_publication:
+          type: string
+          enum:
+          - brouillon
+          - publie
+    Procedure:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        service_id:
+          type: string
+          format: uuid
+        nom:
+          type: string
+        description:
+          type: string
+        cout:
+          type: string
+          nullable: true
+        delai:
+          type: string
+          nullable: true
+        lieu:
+          type: string
+          nullable: true
+        infoComplementaire:
+          type: string
+          nullable: true
+        ordre:
+          type: integer
+        statut:
+          type: string
+          enum:
+          - brouillon
+          - publie
+    ConditionDemarche:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        procedure_id:
+          type: string
+          format: uuid
+        description:
+          type: string
+        ordre:
+          type: integer
+    PieceRequise:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        procedure_id:
+          type: string
+          format: uuid
+        nom:
+          type: string
+        description:
+          type: string
+        nombreExemplaire:
+          type: integer
+        format:
+          type: string
+          nullable: true
+        obligatoire:
+          type: boolean
+        ordre:
+          type: integer
+    Formulaire:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        procedure_id:
+          type: string
+          format: uuid
+        nom:
+          type: string
+        description:
+          type: string
+        actif:
+          type: boolean
+        statut:
+          type: string
+          enum:
+          - brouillon
+          - publie
+    SectionFormulaire:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        formulaire_id:
+          type: string
+          format: uuid
+        nom:
+          type: string
+        description:
+          type: string
+        ordre:
+          type: integer
+    ChampFormulaire:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        section_id:
+          type: string
+          format: uuid
+        type:
+          type: string
+          enum:
+          - texte
+          - nombre
+          - date
+          - select
+          - checkbox
+          - fichier
+        nom:
+          type: string
+        etiquette:
+          type: string
+        placeholder:
+          type: string
+          nullable: true
+        obligatoire:
+          type: boolean
+        valeurParDefaut:
+          type: string
+          nullable: true
+        options:
+          type: object
+          nullable: true
+        ordre:
+          type: integer
+    FormulaireSubmission:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        formulaire_id:
+          type: string
+          format: uuid
+        session_id:
+          type: string
+        reponses:
+          type: object
+        qr_recapitulatif_token:
+          type: string
+          description: Scanné par l'agent au guichet pour récupérer les réponses sans ressaisie
+        dateSoumission:
+          type: string
+          format: date-time
+    DocumentConnaissance:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        organization_id:
+          type: string
+          format: uuid
+        service_id:
+          type: string
+          format: uuid
+          nullable: true
+        procedure_id:
+          type: string
+          format: uuid
+          nullable: true
+        titre:
+          type: string
+        type:
+          type: string
+        description:
+          type: string
+        categorie:
+          type: string
+          nullable: true
+        fichierUrl:
+          type: string
+          format: uri
+        statutIndexation:
+          type: string
+          enum:
+          - en_attente
+          - en_cours
+          - indexe
+          - erreur
+    PlanBatiment:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        organization_id:
+          type: string
+          format: uuid
+        nom:
+          type: string
+          example: Rez-de-chaussée
+        image_url:
+          type: string
+          format: uri
+    Position:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        plan_id:
+          type: string
+          format: uuid
+        entite_type:
+          type: string
+          enum:
+          - borne
+          - service
+        entite_id:
+          type: string
+          format: uuid
+        coordonnee_x:
+          type: number
+        coordonnee_y:
+          type: number
+    Borne:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        organization_id:
+          type: string
+          format: uuid
+        codeUnique:
+          type: string
+        nom:
+          type: string
+        localisation:
+          type: string
+        statut:
+          type: string
+          enum:
+          - active
+          - inactive
+          - maintenance
+        versionLogicielle:
+          type: string
+          nullable: true
+    QRCode:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        borne_id:
+          type: string
+          format: uuid
+          nullable: true
+        organization_id:
+          type: string
+          format: uuid
+          nullable: true
+        code:
+          type: string
+        url:
+          type: string
+          format: uri
+        type:
+          type: string
+          enum:
+          - organisation
+          - service
+          - demarche
+        actif:
+          type: boolean
+        dateExpiration:
+          type: string
+          format: date-time
+          nullable: true
+    PlanAbonnement:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        nom:
+          type: string
+        description:
+          type: string
+        prix:
+          type: number
+        devise:
+          type: string
+        periode:
+          type: string
+          enum:
+          - mensuel
+          - trimestriel
+          - annuel
+        limiteUtilisateurs:
+          type: integer
+        limiteBornes:
+          type: integer
+        limiteStockage:
+          type: integer
+        fonctionnalites:
+          type: object
+        statut:
+          type: string
+          enum:
+          - actif
+          - inactif
+    Abonnement:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        organization_id:
+          type: string
+          format: uuid
+        plan_id:
+          type: string
+          format: uuid
+        statut:
+          type: string
+          enum:
+          - active
+          - expiree
+          - suspendue
+        dateDebut:
+          type: string
+          format: date-time
+        dateFin:
+          type: string
+          format: date-time
+        prochainRenouvellement:
+          type: string
+          format: date-time
+        modeRenouvellement:
+          type: string
+          enum:
+          - automatique
+          - manuel
+        montant:
+          type: number
+        devise:
+          type: string
+    HistoriqueAbonnement:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        abonnement_id:
+          type: string
+          format: uuid
+        statut:
+          type: string
+        ancienneDateFin:
+          type: string
+          format: date-time
+        nouvelleDateFin:
+          type: string
+          format: date-time
+        motif:
+          type: string
+        dateAction:
+          type: string
+          format: date-time
+        effectuePar:
+          type: string
+    Facture:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        abonnement_id:
+          type: string
+          format: uuid
+        numero:
+          type: string
+        dateEmission:
+          type: string
+          format: date-time
+        dateEcheance:
+          type: string
+          format: date-time
+        montant:
+          type: number
+        devise:
+          type: string
+        statut:
+          type: string
+          enum:
+          - brouillon
+          - emise
+          - payee
+          - en_retard
+          - annulee
+        fichierPDF:
+          type: string
+          format: uri
+          nullable: true
+    TransactionPaiement:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        abonnement_id:
+          type: string
+          format: uuid
+        reference:
+          type: string
+        montant:
+          type: number
+        devise:
+          type: string
+        methode:
+          type: string
+          enum:
+          - orange_money
+          - wave
+        statut:
+          type: string
+          enum:
+          - reussi
+          - echoue
+          - en_attente
+        datePaiement:
+          type: string
+          format: date-time
+          nullable: true
+    RappelAbonnement:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        abonnement_id:
+          type: string
+          format: uuid
+        type:
+          type: string
+          enum:
+          - rappel_expiration
+          - rappel_paiement
+          - renouvellement_information
+        canal:
+          type: string
+          enum:
+          - email
+          - sms
+          - inapp
+        dateEnvoi:
+          type: string
+          format: date-time
+        statut:
+          type: string
+          enum:
+          - envoye
+          - en_attente
+          - echoue
+    Conversation:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        organization_id:
+          type: string
+          format: uuid
+        canal:
+          type: string
+          enum:
+          - texte
+          - voix
+        dateDebut:
+          type: string
+          format: date-time
+        dateFin:
+          type: string
+          format: date-time
+        resume:
+          type: string
+          nullable: true
+    Message:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        conversation_id:
+          type: string
+          format: uuid
+        role:
+          type: string
+          enum:
+          - user
+          - assistant
+        contenu:
+          type: string
+        dateCreation:
+          type: string
+          format: date-time
+paths:
+  /admin/organizations:
+    get:
+      summary: Liste — Organization
+      tags:
+      - Admin - Organisations
+      parameters: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Organization'
+        '401': &id002
+          description: Non authentifié
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      security:
+      - clerkAuth: []
+  /admin/organizations/{id}:
+    get:
+      summary: Détail — Organization
+      tags:
+      - Admin - Organisations
+      parameters:
+      - &id001
+        name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Organization'
+        '404': &id003
+          description: Introuvable
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      security:
+      - clerkAuth: []
+    patch:
+      summary: Met à jour — Organization
+      tags:
+      - Admin - Organisations
+      parameters:
+      - *id001
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Organization'
+      responses:
+        '200':
+          description: Mis à jour
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Organization'
+        '401': *id002
+        '403': &id004
+          description: Rôle insuffisant / organisation non autorisée
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404': *id003
+      security:
+      - clerkAuth: []
+    delete:
+      summary: Supprime — Organization
+      tags:
+      - Admin - Organisations
+      parameters:
+      - *id001
+      responses:
+        '204':
+          description: Supprimé
+        '401': *id002
+        '403': *id004
+        '404': *id003
+      security:
+      - clerkAuth: []
+  /admin/demandes-acces:
+    get:
+      summary: Liste — DemandeAccesOrganisation
+      tags:
+      - Admin - Demandes d'accès
+      parameters: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/DemandeAccesOrganisation'
+        '401': *id002
+      security:
+      - clerkAuth: []
+  /admin/demandes-acces/{id}:
+    get:
+      summary: Détail — DemandeAccesOrganisation
+      tags:
+      - Admin - Demandes d'accès
+      parameters:
+      - &id005
+        name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DemandeAccesOrganisation'
+        '404': *id003
+      security:
+      - clerkAuth: []
+    patch:
+      summary: Met à jour — DemandeAccesOrganisation
+      tags:
+      - Admin - Demandes d'accès
+      parameters:
+      - *id005
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DemandeAccesOrganisation'
+      responses:
+        '200':
+          description: Mis à jour
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DemandeAccesOrganisation'
+        '401': *id002
+        '403': *id004
+        '404': *id003
+      security:
+      - clerkAuth: []
+  /admin/organizations/{id}/status:
+    patch:
+      summary: Suspend / réactive une organisation
+      tags:
+      - Admin - Organisations
+      security:
+      - clerkAuth: []
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                statut:
+                  type: string
+                  enum:
+                  - active
+                  - suspendue
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Organization'
+        '403': *id004
+  /admin/plans:
+    get:
+      summary: Liste — PlanAbonnement
+      tags:
+      - Admin - Plans
+      parameters: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/PlanAbonnement'
+        '401': *id002
+      security:
+      - clerkAuth: []
+    post:
+      summary: Crée — PlanAbonnement
+      tags:
+      - Admin - Plans
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PlanAbonnement'
+      responses:
+        '201':
+          description: Créé
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlanAbonnement'
+        '401': *id002
+        '403': *id004
+      security:
+      - clerkAuth: []
+  /admin/plans/{id}:
+    get:
+      summary: Détail — PlanAbonnement
+      tags:
+      - Admin - Plans
+      parameters:
+      - &id006
+        name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlanAbonnement'
+        '404': *id003
+      security:
+      - clerkAuth: []
+    patch:
+      summary: Met à jour — PlanAbonnement
+      tags:
+      - Admin - Plans
+      parameters:
+      - *id006
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PlanAbonnement'
+      responses:
+        '200':
+          description: Mis à jour
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlanAbonnement'
+        '401': *id002
+        '403': *id004
+        '404': *id003
+      security:
+      - clerkAuth: []
+    delete:
+      summary: Supprime — PlanAbonnement
+      tags:
+      - Admin - Plans
+      parameters:
+      - *id006
+      responses:
+        '204':
+          description: Supprimé
+        '401': *id002
+        '403': *id004
+        '404': *id003
+      security:
+      - clerkAuth: []
+  /organizations/{organizationId}/invitations:
+    get:
+      summary: Liste — InvitationOrganisation
+      tags:
+      - Organisations - Invitations
+      parameters:
+      - &id007
+        name: organizationId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/InvitationOrganisation'
+        '401': *id002
+      security:
+      - clerkAuth: []
+    post:
+      summary: Crée — InvitationOrganisation
+      tags:
+      - Organisations - Invitations
+      parameters:
+      - *id007
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InvitationOrganisation'
+      responses:
+        '201':
+          description: Créé
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InvitationOrganisation'
+        '401': *id002
+        '403': *id004
+      security:
+      - clerkAuth: []
+  /organizations/{organizationId}/invitations/{id}:
+    get:
+      summary: Détail — InvitationOrganisation
+      tags:
+      - Organisations - Invitations
+      parameters:
+      - *id007
+      - &id008
+        name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InvitationOrganisation'
+        '404': *id003
+      security:
+      - clerkAuth: []
+    patch:
+      summary: Met à jour — InvitationOrganisation
+      tags:
+      - Organisations - Invitations
+      parameters:
+      - *id007
+      - *id008
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InvitationOrganisation'
+      responses:
+        '200':
+          description: Mis à jour
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InvitationOrganisation'
+        '401': *id002
+        '403': *id004
+        '404': *id003
+      security:
+      - clerkAuth: []
+    delete:
+      summary: Supprime — InvitationOrganisation
+      tags:
+      - Organisations - Invitations
+      parameters:
+      - *id007
+      - *id008
+      responses:
+        '204':
+          description: Supprimé
+        '401': *id002
+        '403': *id004
+        '404': *id003
+      security:
+      - clerkAuth: []
+  /organizations/{organizationId}/membres/invitations:
+    post:
+      summary: Invite un membre (vérifie limiteUtilisateurs du plan avant d'appeler Clerk)
+      tags:
+      - Organisations - Membres
+      security:
+      - clerkAuth: []
+      parameters:
+      - *id007
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                role:
+                  type: string
+                  enum:
+                  - super_admin
+                  - admin
+      responses:
+        '201':
+          description: Invitation envoyée via Clerk
+        '409':
+          description: Limite d'utilisateurs du plan atteinte
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401': *id002
+        '403': *id004
+  /organizations/{organizationId}/subscription:
+    get:
+      summary: Consulte l'abonnement actif
+      tags:
+      - Abonnements
+      security:
+      - clerkAuth: []
+      parameters:
+      - *id007
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Abonnement'
+        '401': *id002
+  /organizations/{organizationId}/subscription/plan:
+    get:
+      summary: Consulte le plan actif et ses limites
+      tags:
+      - Abonnements
+      security:
+      - clerkAuth: []
+      parameters:
+      - *id007
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlanAbonnement'
+        '401': *id002
+  /organizations/{organizationId}/subscription/historique:
+    get:
+      summary: Liste — HistoriqueAbonnement
+      tags:
+      - Abonnements - Historique
+      parameters:
+      - *id007
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/HistoriqueAbonnement'
+        '401': *id002
+      security:
+      - clerkAuth: []
+  /organizations/{organizationId}/subscription/historique/{id}:
+    get:
+      summary: Détail — HistoriqueAbonnement
+      tags:
+      - Abonnements - Historique
+      parameters:
+      - *id007
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HistoriqueAbonnement'
+        '404': *id003
+      security:
+      - clerkAuth: []
+  /organizations/{organizationId}/factures:
+    get:
+      summary: Liste — Facture
+      tags:
+      - Abonnements - Factures
+      parameters:
+      - *id007
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Facture'
+        '401': *id002
+      security:
+      - clerkAuth: []
+  /organizations/{organizationId}/factures/{id}:
+    get:
+      summary: Détail — Facture
+      tags:
+      - Abonnements - Factures
+      parameters:
+      - *id007
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Facture'
+        '404': *id003
+      security:
+      - clerkAuth: []
+  /organizations/{organizationId}/paiements:
+    get:
+      summary: Liste — TransactionPaiement
+      tags:
+      - Abonnements - Paiements
+      parameters:
+      - *id007
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/TransactionPaiement'
+        '401': *id002
+      security:
+      - clerkAuth: []
+  /organizations/{organizationId}/paiements/{id}:
+    get:
+      summary: Détail — TransactionPaiement
+      tags:
+      - Abonnements - Paiements
+      parameters:
+      - *id007
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TransactionPaiement'
+        '404': *id003
+      security:
+      - clerkAuth: []
+  /organizations/{organizationId}/rappels-abonnement:
+    get:
+      summary: Liste — RappelAbonnement
+      tags:
+      - Abonnements - Rappels
+      parameters:
+      - *id007
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/RappelAbonnement'
+        '401': *id002
+      security:
+      - clerkAuth: []
+  /organizations/{organizationId}/rappels-abonnement/{id}:
+    get:
+      summary: Détail — RappelAbonnement
+      tags:
+      - Abonnements - Rappels
+      parameters:
+      - *id007
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RappelAbonnement'
+        '404': *id003
+      security:
+      - clerkAuth: []
+  /organizations/{organizationId}/departements:
+    get:
+      summary: Liste — Departement
+      tags:
+      - Contenu - Départements
+      parameters:
+      - *id007
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Departement'
+        '401': *id002
+      security:
+      - clerkAuth: []
+    post:
+      summary: Crée — Departement
+      tags:
+      - Contenu - Départements
+      parameters:
+      - *id007
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Departement'
+      responses:
+        '201':
+          description: Créé
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Departement'
+        '401': *id002
+        '403': *id004
+      security:
+      - clerkAuth: []
+  /organizations/{organizationId}/departements/{id}:
+    get:
+      summary: Détail — Departement
+      tags:
+      - Contenu - Départements
+      parameters:
+      - *id007
+      - &id009
+        name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Departement'
+        '404': *id003
+      security:
+      - clerkAuth: []
+    patch:
+      summary: Met à jour — Departement
+      tags:
+      - Contenu - Départements
+      parameters:
+      - *id007
+      - *id009
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Departement'
+      responses:
+        '200':
+          description: Mis à jour
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Departement'
+        '401': *id002
+        '403': *id004
+        '404': *id003
+      security:
+      - clerkAuth: []
+    delete:
+      summary: Supprime — Departement
+      tags:
+      - Contenu - Départements
+      parameters:
+      - *id007
+      - *id009
+      responses:
+        '204':
+          description: Supprimé
+        '401': *id002
+        '403': *id004
+        '404': *id003
+      security:
+      - clerkAuth: []
+  /organizations/{organizationId}/services:
+    get:
+      summary: Liste — ServiceOffering
+      tags:
+      - Contenu - Services
+      parameters:
+      - *id007
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/ServiceOffering'
+        '401': *id002
+      security:
+      - clerkAuth: []
+    post:
+      summary: Crée — ServiceOffering
+      tags:
+      - Contenu - Services
+      parameters:
+      - *id007
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ServiceOffering'
+      responses:
+        '201':
+          description: Créé
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServiceOffering'
+        '401': *id002
+        '403': *id004
+      security:
+      - clerkAuth: []
+  /organizations/{organizationId}/services/{id}:
+    get:
+      summary: Détail — ServiceOffering
+      tags:
+      - Contenu - Services
+      parameters:
+      - *id007
+      - &id010
+        name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServiceOffering'
+        '404': *id003
+      security:
+      - clerkAuth: []
+    patch:
+      summary: Met à jour — ServiceOffering
+      tags:
+      - Contenu - Services
+      parameters:
+      - *id007
+      - *id010
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ServiceOffering'
+      responses:
+        '200':
+          description: Mis à jour
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServiceOffering'
+        '401': *id002
+        '403': *id004
+        '404': *id003
+      security:
+      - clerkAuth: []
+    delete:
+      summary: Supprime — ServiceOffering
+      tags:
+      - Contenu - Services
+      parameters:
+      - *id007
+      - *id010
+      responses:
+        '204':
+          description: Supprimé
+        '401': *id002
+        '403': *id004
+        '404': *id003
+      security:
+      - clerkAuth: []
+  /organizations/{organizationId}/services/{serviceId}/procedures:
+    get:
+      summary: Liste — Procedure
+      tags:
+      - Contenu - Démarches
+      parameters:
+      - *id007
+      - &id011
+        name: serviceId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Procedure'
+        '401': *id002
+      security:
+      - clerkAuth: []
+    post:
+      summary: Crée — Procedure
+      tags:
+      - Contenu - Démarches
+      parameters:
+      - *id007
+      - *id011
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Procedure'
+      responses:
+        '201':
+          description: Créé
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Procedure'
+        '401': *id002
+        '403': *id004
+      security:
+      - clerkAuth: []
+  /organizations/{organizationId}/services/{serviceId}/procedures/{id}:
+    get:
+      summary: Détail — Procedure
+      tags:
+      - Contenu - Démarches
+      parameters:
+      - *id007
+      - *id011
+      - &id012
+        name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Procedure'
+        '404': *id003
+      security:
+      - clerkAuth: []
+    patch:
+      summary: Met à jour — Procedure
+      tags:
+      - Contenu - Démarches
+      parameters:
+      - *id007
+      - *id011
+      - *id012
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Procedure'
+      responses:
+        '200':
+          description: Mis à jour
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Procedure'
+        '401': *id002
+        '403': *id004
+        '404': *id003
+      security:
+      - clerkAuth: []
+    delete:
+      summary: Supprime — Procedure
+      tags:
+      - Contenu - Démarches
+      parameters:
+      - *id007
+      - *id011
+      - *id012
+      responses:
+        '204':
+          description: Supprimé
+        '401': *id002
+        '403': *id004
+        '404': *id003
+      security:
+      - clerkAuth: []
+  /organizations/{organizationId}/procedures/{procedureId}/conditions:
+    get:
+      summary: Liste — ConditionDemarche
+      tags:
+      - Contenu - Conditions
+      parameters:
+      - *id007
+      - &id013
+        name: procedureId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/ConditionDemarche'
+        '401': *id002
+      security:
+      - clerkAuth: []
+    post:
+      summary: Crée — ConditionDemarche
+      tags:
+      - Contenu - Conditions
+      parameters:
+      - *id007
+      - *id013
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ConditionDemarche'
+      responses:
+        '201':
+          description: Créé
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConditionDemarche'
+        '401': *id002
+        '403': *id004
+      security:
+      - clerkAuth: []
+  /organizations/{organizationId}/procedures/{procedureId}/conditions/{id}:
+    get:
+      summary: Détail — ConditionDemarche
+      tags:
+      - Contenu - Conditions
+      parameters:
+      - *id007
+      - *id013
+      - &id014
+        name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConditionDemarche'
+        '404': *id003
+      security:
+      - clerkAuth: []
+    delete:
+      summary: Supprime — ConditionDemarche
+      tags:
+      - Contenu - Conditions
+      parameters:
+      - *id007
+      - *id013
+      - *id014
+      responses:
+        '204':
+          description: Supprimé
+        '401': *id002
+        '403': *id004
+        '404': *id003
+      security:
+      - clerkAuth: []
+  /organizations/{organizationId}/procedures/{procedureId}/pieces-requises:
+    get:
+      summary: Liste — PieceRequise
+      tags:
+      - Contenu - Pièces requises
+      parameters:
+      - *id007
+      - *id013
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/PieceRequise'
+        '401': *id002
+      security:
+      - clerkAuth: []
+    post:
+      summary: Crée — PieceRequise
+      tags:
+      - Contenu - Pièces requises
+      parameters:
+      - *id007
+      - *id013
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PieceRequise'
+      responses:
+        '201':
+          description: Créé
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PieceRequise'
+        '401': *id002
+        '403': *id004
+      security:
+      - clerkAuth: []
+  /organizations/{organizationId}/procedures/{procedureId}/pieces-requises/{id}:
+    get:
+      summary: Détail — PieceRequise
+      tags:
+      - Contenu - Pièces requises
+      parameters:
+      - *id007
+      - *id013
+      - &id015
+        name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PieceRequise'
+        '404': *id003
+      security:
+      - clerkAuth: []
+    patch:
+      summary: Met à jour — PieceRequise
+      tags:
+      - Contenu - Pièces requises
+      parameters:
+      - *id007
+      - *id013
+      - *id015
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PieceRequise'
+      responses:
+        '200':
+          description: Mis à jour
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PieceRequise'
+        '401': *id002
+        '403': *id004
+        '404': *id003
+      security:
+      - clerkAuth: []
+    delete:
+      summary: Supprime — PieceRequise
+      tags:
+      - Contenu - Pièces requises
+      parameters:
+      - *id007
+      - *id013
+      - *id015
+      responses:
+        '204':
+          description: Supprimé
+        '401': *id002
+        '403': *id004
+        '404': *id003
+      security:
+      - clerkAuth: []
+  /organizations/{organizationId}/procedures/{procedureId}/formulaire:
+    get:
+      summary: Liste — Formulaire
+      tags:
+      - Formulaires
+      parameters:
+      - *id007
+      - *id013
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Formulaire'
+        '401': *id002
+      security:
+      - clerkAuth: []
+    post:
+      summary: Crée — Formulaire
+      tags:
+      - Formulaires
+      parameters:
+      - *id007
+      - *id013
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Formulaire'
+      responses:
+        '201':
+          description: Créé
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Formulaire'
+        '401': *id002
+        '403': *id004
+      security:
+      - clerkAuth: []
+  /organizations/{organizationId}/procedures/{procedureId}/formulaire/{id}:
+    get:
+      summary: Détail — Formulaire
+      tags:
+      - Formulaires
+      parameters:
+      - *id007
+      - *id013
+      - &id016
+        name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Formulaire'
+        '404': *id003
+      security:
+      - clerkAuth: []
+    patch:
+      summary: Met à jour — Formulaire
+      tags:
+      - Formulaires
+      parameters:
+      - *id007
+      - *id013
+      - *id016
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Formulaire'
+      responses:
+        '200':
+          description: Mis à jour
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Formulaire'
+        '401': *id002
+        '403': *id004
+        '404': *id003
+      security:
+      - clerkAuth: []
+    delete:
+      summary: Supprime — Formulaire
+      tags:
+      - Formulaires
+      parameters:
+      - *id007
+      - *id013
+      - *id016
+      responses:
+        '204':
+          description: Supprimé
+        '401': *id002
+        '403': *id004
+        '404': *id003
+      security:
+      - clerkAuth: []
+  /organizations/{organizationId}/formulaires/{formulaireId}/sections:
+    get:
+      summary: Liste — SectionFormulaire
+      tags:
+      - Formulaires - Sections
+      parameters:
+      - *id007
+      - &id017
+        name: formulaireId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/SectionFormulaire'
+        '401': *id002
+      security:
+      - clerkAuth: []
+    post:
+      summary: Crée — SectionFormulaire
+      tags:
+      - Formulaires - Sections
+      parameters:
+      - *id007
+      - *id017
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SectionFormulaire'
+      responses:
+        '201':
+          description: Créé
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SectionFormulaire'
+        '401': *id002
+        '403': *id004
+      security:
+      - clerkAuth: []
+  /organizations/{organizationId}/formulaires/{formulaireId}/sections/{id}:
+    get:
+      summary: Détail — SectionFormulaire
+      tags:
+      - Formulaires - Sections
+      parameters:
+      - *id007
+      - *id017
+      - &id018
+        name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SectionFormulaire'
+        '404': *id003
+      security:
+      - clerkAuth: []
+    patch:
+      summary: Met à jour — SectionFormulaire
+      tags:
+      - Formulaires - Sections
+      parameters:
+      - *id007
+      - *id017
+      - *id018
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SectionFormulaire'
+      responses:
+        '200':
+          description: Mis à jour
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SectionFormulaire'
+        '401': *id002
+        '403': *id004
+        '404': *id003
+      security:
+      - clerkAuth: []
+    delete:
+      summary: Supprime — SectionFormulaire
+      tags:
+      - Formulaires - Sections
+      parameters:
+      - *id007
+      - *id017
+      - *id018
+      responses:
+        '204':
+          description: Supprimé
+        '401': *id002
+        '403': *id004
+        '404': *id003
+      security:
+      - clerkAuth: []
+  /organizations/{organizationId}/sections/{sectionId}/champs:
+    get:
+      summary: Liste — ChampFormulaire
+      tags:
+      - Formulaires - Champs
+      parameters:
+      - *id007
+      - &id019
+        name: sectionId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/ChampFormulaire'
+        '401': *id002
+      security:
+      - clerkAuth: []
+    post:
+      summary: Crée — ChampFormulaire
+      tags:
+      - Formulaires - Champs
+      parameters:
+      - *id007
+      - *id019
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChampFormulaire'
+      responses:
+        '201':
+          description: Créé
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChampFormulaire'
+        '401': *id002
+        '403': *id004
+      security:
+      - clerkAuth: []
+  /organizations/{organizationId}/sections/{sectionId}/champs/{id}:
+    get:
+      summary: Détail — ChampFormulaire
+      tags:
+      - Formulaires - Champs
+      parameters:
+      - *id007
+      - *id019
+      - &id020
+        name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChampFormulaire'
+        '404': *id003
+      security:
+      - clerkAuth: []
+    patch:
+      summary: Met à jour — ChampFormulaire
+      tags:
+      - Formulaires - Champs
+      parameters:
+      - *id007
+      - *id019
+      - *id020
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChampFormulaire'
+      responses:
+        '200':
+          description: Mis à jour
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChampFormulaire'
+        '401': *id002
+        '403': *id004
+        '404': *id003
+      security:
+      - clerkAuth: []
+    delete:
+      summary: Supprime — ChampFormulaire
+      tags:
+      - Formulaires - Champs
+      parameters:
+      - *id007
+      - *id019
+      - *id020
+      responses:
+        '204':
+          description: Supprimé
+        '401': *id002
+        '403': *id004
+        '404': *id003
+      security:
+      - clerkAuth: []
+  /public/organizations/{organizationId}/procedures/{procedureId}/formulaire:
+    get:
+      summary: US4 — Usager consulte le formulaire d'une démarche
+      tags:
+      - Public - Formulaires
+      security: []
+      parameters:
+      - *id007
+      - *id013
+      responses:
+        '200':
+          description: OK, avec sections et champs
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Formulaire'
+        '404': *id003
+  /public/organizations/{organizationId}/formulaires/{formulaireId}/submissions:
+    post:
+      summary: US4 — Usager soumet un formulaire rempli
+      tags:
+      - Public - Formulaires
+      security: []
+      parameters:
+      - *id007
+      - *id017
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                session_id:
+                  type: string
+                reponses:
+                  type: object
+      responses:
+        '201':
+          description: Soumission enregistrée
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FormulaireSubmission'
+  /organizations/{organizationId}/documents/upload-url:
+    post:
+      summary: 'Upload doc — étape 1/2 : URL pré-signée MinIO'
+      tags:
+      - Documents
+      security:
+      - clerkAuth: []
+      parameters:
+      - *id007
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                nom_fichier:
+                  type: string
+                content_type:
+                  type: string
+      responses:
+        '200':
+          description: URL pré-signée
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  document_id:
+                    type: string
+                    format: uuid
+                  upload_url:
+                    type: string
+                    format: uri
+  /organizations/{organizationId}/documents/{documentId}/confirm:
+    post:
+      summary: 'Upload doc — étape 2/2 : confirme, publie la tâche d''indexation'
+      tags:
+      - Documents
+      security:
+      - clerkAuth: []
+      parameters:
+      - *id007
+      - name: documentId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: statutIndexation = en_attente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DocumentConnaissance'
+  /organizations/{organizationId}/documents:
+    get:
+      summary: Liste — DocumentConnaissance
+      tags:
+      - Documents
+      parameters:
+      - *id007
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/DocumentConnaissance'
+        '401': *id002
+      security:
+      - clerkAuth: []
+  /organizations/{organizationId}/documents/{id}:
+    get:
+      summary: Détail — DocumentConnaissance
+      tags:
+      - Documents
+      parameters:
+      - *id007
+      - &id021
+        name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DocumentConnaissance'
+        '404': *id003
+      security:
+      - clerkAuth: []
+    delete:
+      summary: Supprime — DocumentConnaissance
+      tags:
+      - Documents
+      parameters:
+      - *id007
+      - *id021
+      responses:
+        '204':
+          description: Supprimé
+        '401': *id002
+        '403': *id004
+        '404': *id003
+      security:
+      - clerkAuth: []
+  /organizations/{organizationId}/bornes:
+    get:
+      summary: Liste — Borne
+      tags:
+      - Bornes & QR
+      parameters:
+      - *id007
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Borne'
+        '401': *id002
+      security:
+      - clerkAuth: []
+    post:
+      summary: Crée — Borne
+      tags:
+      - Bornes & QR
+      parameters:
+      - *id007
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Borne'
+      responses:
+        '201':
+          description: Créé
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Borne'
+        '401': *id002
+        '403': *id004
+      security:
+      - clerkAuth: []
+  /organizations/{organizationId}/bornes/{id}:
+    get:
+      summary: Détail — Borne
+      tags:
+      - Bornes & QR
+      parameters:
+      - *id007
+      - &id022
+        name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Borne'
+        '404': *id003
+      security:
+      - clerkAuth: []
+    patch:
+      summary: Met à jour — Borne
+      tags:
+      - Bornes & QR
+      parameters:
+      - *id007
+      - *id022
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Borne'
+      responses:
+        '200':
+          description: Mis à jour
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Borne'
+        '401': *id002
+        '403': *id004
+        '404': *id003
+      security:
+      - clerkAuth: []
+    delete:
+      summary: Supprime — Borne
+      tags:
+      - Bornes & QR
+      parameters:
+      - *id007
+      - *id022
+      responses:
+        '204':
+          description: Supprimé
+        '401': *id002
+        '403': *id004
+        '404': *id003
+      security:
+      - clerkAuth: []
+  /organizations/{organizationId}/qrcodes:
+    get:
+      summary: Liste — QRCode
+      tags:
+      - Bornes & QR
+      parameters:
+      - *id007
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/QRCode'
+        '401': *id002
+      security:
+      - clerkAuth: []
+    post:
+      summary: Crée — QRCode
+      tags:
+      - Bornes & QR
+      parameters:
+      - *id007
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/QRCode'
+      responses:
+        '201':
+          description: Créé
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QRCode'
+        '401': *id002
+        '403': *id004
+      security:
+      - clerkAuth: []
+  /organizations/{organizationId}/qrcodes/{id}:
+    get:
+      summary: Détail — QRCode
+      tags:
+      - Bornes & QR
+      parameters:
+      - *id007
+      - &id023
+        name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QRCode'
+        '404': *id003
+      security:
+      - clerkAuth: []
+    patch:
+      summary: Met à jour — QRCode
+      tags:
+      - Bornes & QR
+      parameters:
+      - *id007
+      - *id023
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/QRCode'
+      responses:
+        '200':
+          description: Mis à jour
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QRCode'
+        '401': *id002
+        '403': *id004
+        '404': *id003
+      security:
+      - clerkAuth: []
+    delete:
+      summary: Supprime — QRCode
+      tags:
+      - Bornes & QR
+      parameters:
+      - *id007
+      - *id023
+      responses:
+        '204':
+          description: Supprimé
+        '401': *id002
+        '403': *id004
+        '404': *id003
+      security:
+      - clerkAuth: []
+  /organizations/{organizationId}/plans:
+    get:
+      summary: Liste — PlanBatiment
+      tags:
+      - Cartographie
+      parameters:
+      - *id007
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/PlanBatiment'
+        '401': *id002
+      security:
+      - clerkAuth: []
+    post:
+      summary: Crée — PlanBatiment
+      tags:
+      - Cartographie
+      parameters:
+      - *id007
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PlanBatiment'
+      responses:
+        '201':
+          description: Créé
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlanBatiment'
+        '401': *id002
+        '403': *id004
+      security:
+      - clerkAuth: []
+  /organizations/{organizationId}/plans/{id}:
+    get:
+      summary: Détail — PlanBatiment
+      tags:
+      - Cartographie
+      parameters:
+      - *id007
+      - &id024
+        name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlanBatiment'
+        '404': *id003
+      security:
+      - clerkAuth: []
+    patch:
+      summary: Met à jour — PlanBatiment
+      tags:
+      - Cartographie
+      parameters:
+      - *id007
+      - *id024
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PlanBatiment'
+      responses:
+        '200':
+          description: Mis à jour
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlanBatiment'
+        '401': *id002
+        '403': *id004
+        '404': *id003
+      security:
+      - clerkAuth: []
+    delete:
+      summary: Supprime — PlanBatiment
+      tags:
+      - Cartographie
+      parameters:
+      - *id007
+      - *id024
+      responses:
+        '204':
+          description: Supprimé
+        '401': *id002
+        '403': *id004
+        '404': *id003
+      security:
+      - clerkAuth: []
+  /organizations/{organizationId}/plans/{planId}/positions:
+    get:
+      summary: Liste — Position
+      tags:
+      - Cartographie
+      parameters:
+      - *id007
+      - &id025
+        name: planId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Position'
+        '401': *id002
+      security:
+      - clerkAuth: []
+    post:
+      summary: Crée — Position
+      tags:
+      - Cartographie
+      parameters:
+      - *id007
+      - *id025
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Position'
+      responses:
+        '201':
+          description: Créé
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Position'
+        '401': *id002
+        '403': *id004
+      security:
+      - clerkAuth: []
+  /organizations/{organizationId}/plans/{planId}/positions/{id}:
+    get:
+      summary: Détail — Position
+      tags:
+      - Cartographie
+      parameters:
+      - *id007
+      - *id025
+      - &id026
+        name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Position'
+        '404': *id003
+      security:
+      - clerkAuth: []
+    delete:
+      summary: Supprime — Position
+      tags:
+      - Cartographie
+      parameters:
+      - *id007
+      - *id025
+      - *id026
+      responses:
+        '204':
+          description: Supprimé
+        '401': *id002
+        '403': *id004
+        '404': *id003
+      security:
+      - clerkAuth: []
+  /organizations/{organizationId}/conversations:
+    get:
+      summary: Liste — Conversation
+      tags:
+      - Conversations (reporting)
+      parameters:
+      - *id007
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Conversation'
+        '401': *id002
+      security:
+      - clerkAuth: []
+  /organizations/{organizationId}/conversations/{id}:
+    get:
+      summary: Détail — Conversation
+      tags:
+      - Conversations (reporting)
+      parameters:
+      - *id007
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Conversation'
+        '404': *id003
+      security:
+      - clerkAuth: []
+  /organizations/{organizationId}/conversations/{conversationId}/messages:
+    get:
+      summary: Liste les messages d'une conversation (reporting)
+      tags:
+      - Conversations (reporting)
+      security:
+      - clerkAuth: []
+      parameters:
+      - *id007
+      - name: conversationId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Message'
+  /public/access/{accessToken}:
+    get:
+      summary: US2 — Résout une Borne ou un QRCode vers une organisation
+      tags:
+      - Public - Usager
+      security: []
+      parameters:
+      - name: accessToken
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccessResolution'
+        '404': *id003
+  /public/organizations/{organizationId}/services:
+    get:
+      summary: US1/US3 — Liste les services publiés
+      tags:
+      - Public - Usager
+      security: []
+      parameters:
+      - *id007
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/ServiceOffering'
+  /public/organizations/{organizationId}/services/{serviceId}/procedures:
+    get:
+      summary: Liste les démarches d'un service
+      tags:
+      - Public - Usager
+      security: []
+      parameters:
+      - *id007
+      - *id011
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Procedure'
+  /public/organizations/{organizationId}/procedures/{procedureId}:
+    get:
+      summary: Détail d'une démarche
+      tags:
+      - Public - Usager
+      security: []
+      parameters:
+      - *id007
+      - *id013
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Procedure'
+        '404': *id003
+  /access-ticket:
+    post:
+      summary: US2 — Émet un ticket signé pour dialoguer directement avec l'AI Service
+      tags:
+      - Public - Usager
+      security: []
+      parameters:
+      - name: session_id
+        in: query
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Ticket émis, 15 min
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ticket:
+                    type: string
+                  expires_in:
+                    type: integer
+        '403':
+          description: Session invalide ou abonnement expiré
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /me:
+    get:
+      summary: US3 — Info de l'utilisateur connecté
+      tags:
+      - Authentifié
+      security:
+      - clerkAuth: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthenticatedUser'
+        '401': *id002
