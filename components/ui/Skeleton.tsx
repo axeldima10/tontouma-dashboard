@@ -4,6 +4,7 @@ export function Skeleton({ className }: { className?: string }) {
   return <div aria-hidden className={cn("skeleton", className)} />;
 }
 
+<<<<<<< HEAD
 /** Squelette générique d'une page : en-tête, tuiles, liste. Épouse la mise en page réelle. */
 export function PageSkeleton({ tiles = 4, rows = 6 }: { tiles?: number; rows?: number }) {
   return (
@@ -42,6 +43,14 @@ export function ListSkeleton({ rows = 6 }: { rows?: number }) {
           <Skeleton className="h-6 w-20 rounded-full" />
         </div>
       ))}
+=======
+/** Annonce le chargement aux lecteurs d'écran une seule fois par zone. */
+export function LoadingRegion({ label, children, className }: { label: string; children: React.ReactNode; className?: string }) {
+  return (
+    <div role="status" aria-live="polite" aria-busy="true" className={className}>
+      <span className="sr-only">{label}</span>
+      {children}
+>>>>>>> 939f032 (First Commit)
     </div>
   );
 }

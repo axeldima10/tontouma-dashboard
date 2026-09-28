@@ -1,7 +1,11 @@
 import "server-only";
+<<<<<<< HEAD
 import { cache } from "react";
 import type { Subscription } from "@/lib/api/contract";
 import { ApiError, settle, type Settled } from "@/lib/api/errors";
+=======
+import { settle, type Settled } from "@/lib/api/errors";
+>>>>>>> 939f032 (First Commit)
 import { requireOrgContext, type OrgContext } from "@/lib/auth/guards";
 import { repo, type OrgCtx, type Repository } from "./repository";
 
@@ -19,9 +23,19 @@ export async function loadOrg<T>(
   return { context, result };
 }
 
+<<<<<<< HEAD
 /**
  * Écrans réservés au super administrateur d'organisation : rôle vérifié AVANT toute lecture.
  * `forbidden` = afficher l'état interdit (le backend reste seul juge).
+=======
+export async function loadPlatform<T>(read: (r: Repository) => Promise<T>): Promise<Settled<T>> {
+  return settle(repo().then(read));
+}
+
+/**
+ * Écrans de gestion (super administrateur) : le rôle est vérifié AVANT toute lecture.
+ * `forbidden` = afficher l'état interdit (le backend refuserait de toute façon).
+>>>>>>> 939f032 (First Commit)
  */
 export async function loadSuperAdmin<T>(
   urlOrgId: string,
@@ -30,6 +44,7 @@ export async function loadSuperAdmin<T>(
   const context = await requireOrgContext(urlOrgId);
   if (!context.isSuperAdmin) return { context, forbidden: true };
   const r = await repo();
+<<<<<<< HEAD
   return { context, forbidden: false, result: await settle(read(r, { orgKey: context.orgId })) };
 }
 
@@ -62,3 +77,7 @@ export const getAccessState = cache(async (orgKey: string): Promise<AccessState>
     return { readOnly: null, subscription: null };
   }
 });
+=======
+  return { context, forbidden: false, result: await settle(read(r, { orgKey: context.orgId, role: context.orgRole })) };
+}
+>>>>>>> 939f032 (First Commit)

@@ -1,7 +1,11 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { ProcedureEditor } from "@/components/features/procedures/ProcedureEditor";
+<<<<<<< HEAD
 import { ErrorState } from "@/components/states/States";
+=======
+import { ErrorState } from "@/components/states/ErrorState";
+>>>>>>> 939f032 (First Commit)
 import { loadProcedureEditor } from "@/lib/data/procedure-page";
 
 export const metadata: Metadata = { title: "Nouvelle démarche" };

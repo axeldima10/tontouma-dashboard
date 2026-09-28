@@ -6,7 +6,11 @@ import { LazyClerkTokenSource } from "./LazyClerk";
 
 type SessionContextValue = {
   session: Session;
+<<<<<<< HEAD
   /** Jeton frais pour le backend, demandé juste avant chaque requête (null en mode dev). Jamais stocké. */
+=======
+  /** Jeton frais pour le backend, demandé juste avant chaque requête (null en mode dev). */
+>>>>>>> 939f032 (First Commit)
   getToken: () => Promise<string | null>;
 };
 

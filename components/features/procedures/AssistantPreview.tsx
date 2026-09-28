@@ -1,8 +1,15 @@
 "use client";
 
+<<<<<<< HEAD
 import { AnimatePresence, motion } from "motion/react";
 import { BotMark } from "@/components/shell/BotMark";
 import { formatNumber, formatXOF } from "@/lib/format";
+=======
+import { useRef } from "react";
+import { BotMark } from "@/components/shell/BotMark";
+import { formatNumber, formatXOF } from "@/lib/format";
+import { gsap, useGSAP, MEDIA } from "@/lib/motion/gsap";
+>>>>>>> 939f032 (First Commit)
 
 type AssistantPreviewProps = {
   title: string;
@@ -19,6 +26,23 @@ type AssistantPreviewProps = {
  * Purement illustratif : la formulation réelle est produite par le service IA.
  */
 export function AssistantPreview({ title, cost, processingDays, place, conditions, documents, published }: AssistantPreviewProps) {
+<<<<<<< HEAD
+=======
+  const ref = useRef<HTMLDivElement>(null);
+  const signature = [title, cost, processingDays, place, conditions.join("|"), documents.join("|")].join("§");
+
+  useGSAP(
+    () => {
+      const mm = gsap.matchMedia();
+      mm.add(MEDIA.motion, () => {
+        gsap.fromTo(".preview-bubble", { opacity: 0.55 }, { opacity: 1, duration: 0.5 });
+      });
+      return () => mm.revert();
+    },
+    { dependencies: [signature], scope: ref },
+  );
+
+>>>>>>> 939f032 (First Commit)
   const missing: string[] = [];
   if (cost === null) missing.push("le coût");
   if (processingDays === null) missing.push("le délai");
@@ -26,6 +50,7 @@ export function AssistantPreview({ title, cost, processingDays, place, condition
   if (documents.length === 0) missing.push("les pièces requises");
 
   return (
+<<<<<<< HEAD
     <section className="glass overflow-hidden rounded-[28px]">
       <header className="flex items-center gap-3 border-b border-[var(--glass-border)] px-5 py-4">
         <BotMark size={34} />
@@ -75,10 +100,61 @@ export function AssistantPreview({ title, cost, processingDays, place, condition
         </div>
         {missing.length > 0 && (
           <p className="rounded-[16px] bg-warning-soft px-3.5 py-2.5 text-xs text-warning">
+=======
+    <div ref={ref} className="surface overflow-hidden">
+      <div className="border-b border-line bg-surface-2 px-5 py-3">
+        <p className="kicker">Ce que l’assistant dira</p>
+        <p className="mt-0.5 text-xs text-muted">
+          {published ? "Contenu publié : visible des citoyens." : "Brouillon : invisible des citoyens tant qu’il n’est pas publié."}
+        </p>
+      </div>
+      <div className="space-y-3 p-5">
+        <p className="ml-auto w-fit max-w-[85%] rounded-2xl rounded-br-md bg-green px-3.5 py-2 text-[13px] text-on-green">
+          Comment faire pour « {title || "cette démarche"} » ?
+        </p>
+        <div className="flex items-end gap-2">
+          <BotMark size={26} />
+          <div className="preview-bubble max-w-[88%] space-y-2 rounded-2xl rounded-bl-md border border-line bg-panel px-3.5 py-2.5 text-[13px] leading-relaxed text-text">
+            <p>
+              {cost === null ? "Le coût n’est pas précisé" : cost === 0 ? "C’est gratuit" : `Cela coûte ${formatXOF(cost)}`}
+              {processingDays === null
+                ? "."
+                : `, avec un délai de ${formatNumber(processingDays)} jour${processingDays > 1 ? "s" : ""}.`}
+              {place && ` Rendez-vous : ${place}.`}
+            </p>
+            {conditions.length > 0 && (
+              <div>
+                <p className="font-medium">Conditions :</p>
+                <ul className="mt-0.5 list-disc space-y-0.5 pl-4 text-muted">
+                  {conditions.map((c, i) => (
+                    <li key={i}>{c}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+            {documents.length > 0 && (
+              <div>
+                <p className="font-medium">À apporter :</p>
+                <ul className="mt-0.5 list-disc space-y-0.5 pl-4 text-muted">
+                  {documents.map((d, i) => (
+                    <li key={i}>{d}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
+        </div>
+        {missing.length > 0 && (
+          <p className="rounded-xl bg-warning-soft px-3 py-2 text-xs text-warning">
+>>>>>>> 939f032 (First Commit)
             À compléter pour une réponse complète : {missing.join(", ")}.
           </p>
         )}
       </div>
+<<<<<<< HEAD
     </section>
+=======
+    </div>
+>>>>>>> 939f032 (First Commit)
   );
 }
