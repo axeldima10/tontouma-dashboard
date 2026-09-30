@@ -4,8 +4,16 @@
  * Tous les usages client de Clerk, regroupés pour être chargés à la demande (mode Clerk uniquement).
  * En mode dev, ce module n'est jamais téléchargé.
  */
-import { OrganizationSwitcher, UserButton, useAuth, useOrganization } from "@clerk/nextjs";
+import { OrganizationList, OrganizationSwitcher, SignIn, UserButton, useAuth, useOrganization } from "@clerk/nextjs";
 import { useEffect, type ReactNode } from "react";
+
+export function ClerkSignIn() {
+  return <SignIn />;
+}
+
+export function ClerkOrgList() {
+  return <OrganizationList hidePersonal afterSelectOrganizationUrl="/dashboard/:id" />;
+}
 
 export function ClerkUserButton() {
   return <UserButton appearance={{ elements: { avatarBox: "size-9 ring-2 ring-white/70" } }} />;
@@ -16,7 +24,6 @@ export function ClerkOrgSwitcher() {
     <OrganizationSwitcher
       hidePersonal
       afterSelectOrganizationUrl="/dashboard/:id"
-      afterCreateOrganizationUrl="/dashboard/:id"
       appearance={{
         elements: {
           rootBox: "w-full",

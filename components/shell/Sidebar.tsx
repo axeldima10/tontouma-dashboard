@@ -118,12 +118,12 @@ export function Sidebar({ variant, basePath, isSuperAdmin, collapsed, onToggle, 
           </Fragment>
         ))}
 
-        {/* Passerelle entre les deux espaces pour l'équipe Tontouma. */}
-        {session.isPlatformAdmin && (
+        {/* Passerelle entre les deux espaces pour l'équipe Tontouma (vers l'organisation active seulement : /dashboard renvoie l'équipe vers /admin). */}
+        {session.isPlatformAdmin && (variant === "org" || session.orgId) && (
           <div className="mt-6">
             <Tip content={variant === "admin" ? "Espace organisation" : "Administration Tontouma"} side="right" disabled={!collapsed}>
               <Link
-                href={variant === "admin" ? "/dashboard" : "/admin"}
+                href={variant === "admin" ? `/dashboard/${session.orgId}` : "/admin"}
                 onClick={onNavigate}
                 className={cn(
                   "flex h-10 items-center gap-3 rounded-2xl border border-dashed border-border-strong text-[13px] text-muted-foreground transition hover:border-solid hover:bg-accent hover:text-foreground",

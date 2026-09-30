@@ -5,6 +5,7 @@ import { frFR } from "@clerk/localizations";
 import { cookies } from "next/headers";
 import { DevPersonaSwitcher } from "@/components/auth/DevPersonaSwitcher";
 import { Backdrop } from "@/components/shell/Backdrop";
+import { InlineScript } from "@/components/ui/InlineScript";
 import { isDevAuth } from "@/lib/auth/mode";
 import { PERSONA_COOKIE, toPersonaId } from "@/lib/auth/personas";
 import { themeInitScript } from "@/lib/theme";
@@ -54,7 +55,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="fr" suppressHydrationWarning className={`${urbanist.variable} h-full antialiased`}>
       <head>
-        <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
+        <InlineScript html={themeInitScript} />
       </head>
       <body className="min-h-full">
         <Backdrop />

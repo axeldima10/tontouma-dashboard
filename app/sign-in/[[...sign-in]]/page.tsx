@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
-import { SignIn } from "@clerk/nextjs";
 import { redirect } from "next/navigation";
+import { LazyClerkSignIn } from "@/components/auth/LazyClerk";
 import { BotMark } from "@/components/shell/BotMark";
 import { SignInStory } from "@/components/shell/SignInStory";
 import { isDevAuth } from "@/lib/auth/mode";
@@ -17,7 +17,7 @@ export default function SignInPage() {
           <BotMark size={44} alive />
           <p className="text-lg font-bold tracking-tight text-foreground">Tontouma Bot</p>
         </div>
-        <SignIn />
+        <LazyClerkSignIn />
       </main>
     </div>
   );
