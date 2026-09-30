@@ -11,7 +11,6 @@
   "dependencies": {
     "@clerk/localizations": "^4.20.0",
     "@clerk/nextjs": "^7.9.7",
-<<<<<<< HEAD
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "cmdk": "^1.1.1",
@@ -24,16 +23,6 @@
     "server-only": "^0.0.1",
     "sonner": "^2.0.8",
     "tailwind-merge": "^3.7.0",
-=======
-    "@gsap/react": "^2.1.2",
-    "gsap": "^3.15.0",
-    "lucide-react": "^1.48.0",
-    "next": "16.3.6",
-    "qrcode": "^1.5.4",
-    "react": "19.2.8",
-    "react-dom": "19.2.8",
-    "server-only": "^0.0.1",
->>>>>>> 939f032 (First Commit)
     "zod": "^4.6.5"
   },
   "devDependencies": {

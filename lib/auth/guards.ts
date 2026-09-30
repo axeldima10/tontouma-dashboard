@@ -12,7 +12,8 @@ export type OrgContext = {
   isSuperAdmin: boolean;
 };
 
-async function requireSession(): Promise<Session> {
+/** Contrôle d'accès au niveau de la ressource (layout / page), et non dans le proxy. */
+export async function requireSession(): Promise<Session> {
   const session = await getSession();
   if (session) return session;
   // Seul le mode Clerk peut ne pas avoir de session.

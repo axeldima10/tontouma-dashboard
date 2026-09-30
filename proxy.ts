@@ -1,42 +1,18 @@
-import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
+import { clerkMiddleware } from "@clerk/nextjs/server";
 import { NextResponse, type NextFetchEvent, type NextRequest } from "next/server";
 import { isDevAuth } from "@/lib/auth/mode";
-import { PERSONA_COOKIE, PERSONAS, toPersonaId } from "@/lib/auth/personas";
-import { isPlatformAdminClaims } from "@/lib/auth/roles";
-
-const isOrgDashboard = createRouteMatcher(["/dashboard(.*)"]);
-const isPlatformAdmin = createRouteMatcher(["/admin(.*)"]);
-
-function forbidden(req: NextRequest) {
-  return NextResponse.rewrite(new URL("/acces-refuse", req.url), { status: 403 });
-}
 
 /**
- * Protection côté serveur (jamais uniquement côté client) :
- * - /dashboard et /admin exigent une session ;
- * - /admin exige la claim `platform_role: "admin"`.
- * Le backend reste l'autorité : ceci n'évite que l'affichage d'écrans inutiles.
+ * Le proxy ne fait qu'attacher l'état d'authentification Clerk à la requête.
+ * Le contrôle d'accès se fait au niveau de la ressource (recommandation Clerk) :
+ * - /dashboard : `requireSession` / `requireOrgContext` (lib/auth/guards.ts) dans les layouts et pages ;
+ * - /admin : `app/(admin)/admin/layout.tsx` exige une session et la claim plateforme.
+ * Le backend reste l'autorité : ces contrôles n'évitent que l'affichage d'écrans inutiles.
  */
-const clerkProxy = clerkMiddleware(async (auth, req) => {
-  if (isOrgDashboard(req) || isPlatformAdmin(req)) await auth.protect();
-
-  if (isPlatformAdmin(req)) {
-    const { sessionClaims } = await auth();
-    if (!isPlatformAdminClaims(sessionClaims)) return forbidden(req);
-  }
-});
-
-/** Mode dev : mêmes règles d'accès, avec le persona fictif à la place de la session Clerk. */
-function devProxy(req: NextRequest) {
-  if (isPlatformAdmin(req)) {
-    const persona = PERSONAS[toPersonaId(req.cookies.get(PERSONA_COOKIE)?.value)];
-    if (!persona.isPlatformAdmin) return forbidden(req);
-  }
-  return NextResponse.next();
-}
+const clerkProxy = clerkMiddleware();
 
 export default function proxy(req: NextRequest, event: NextFetchEvent) {
-  return isDevAuth() ? devProxy(req) : clerkProxy(req, event);
+  return isDevAuth() ? NextResponse.next() : clerkProxy(req, event);
 }
 
 export const config = {

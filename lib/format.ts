@@ -61,7 +61,6 @@ export function formatRelative(value: string | Date, now: Date = new Date()): st
   }
   return "à l’instant";
 }
-<<<<<<< HEAD
 
 /** Taille de fichier lisible (« 1,8 Mo »). */
 export function formatBytes(bytes: number | null): string {
@@ -122,5 +121,3 @@ export function summarizeOpeningHours(rows: { dayOfWeek: keyof typeof DAY_SHORT;
   }
   return groups.map((g) => `${g.from === g.to ? g.from : `${g.from}–${g.to}`} ${g.hours}`).join(" · ");
 }
-=======
->>>>>>> 939f032 (First Commit)

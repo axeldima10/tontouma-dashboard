@@ -1,6 +1,5 @@
 "use client";
 
-<<<<<<< HEAD
 import { AlertTriangle, Eye, Trash2 } from "lucide-react";
 import { AlertDialog as A } from "radix-ui";
 import type { ReactNode } from "react";
@@ -17,26 +16,10 @@ type ConfirmDialogProps = {
   confirmLabel: string;
   onConfirm: () => void;
   tone?: Tone;
-=======
-import type { ReactNode } from "react";
-import { Button } from "./Button";
-import { Dialog } from "./Dialog";
-
-type ConfirmDialogProps = {
-  open: boolean;
-  onCancel: () => void;
-  onConfirm: () => void;
-  title: string;
-  /** Conséquence concrète pour les citoyens, formulée clairement. */
-  description: ReactNode;
-  confirmLabel: string;
-  tone?: "primary" | "danger";
->>>>>>> 939f032 (First Commit)
   loading?: boolean;
   children?: ReactNode;
 };
 
-<<<<<<< HEAD
 const ICONS: Record<Tone, ReactNode> = {
   publish: <Eye />,
   danger: <Trash2 />,
@@ -86,38 +69,5 @@ export function ConfirmDialog({ open, onOpenChange, title, description, confirmL
         </A.Content>
       </A.Portal>
     </A.Root>
-=======
-/** Confirmation explicite : publier, dépublier, supprimer, suspendre. */
-export function ConfirmDialog({
-  open,
-  onCancel,
-  onConfirm,
-  title,
-  description,
-  confirmLabel,
-  tone = "primary",
-  loading,
-  children,
-}: ConfirmDialogProps) {
-  return (
-    <Dialog
-      open={open}
-      onClose={onCancel}
-      title={title}
-      description={description}
-      footer={
-        <>
-          <Button variant="secondary" onClick={onCancel} disabled={loading}>
-            Annuler
-          </Button>
-          <Button variant={tone === "danger" ? "danger" : "primary"} onClick={onConfirm} loading={loading}>
-            {confirmLabel}
-          </Button>
-        </>
-      }
-    >
-      {children}
-    </Dialog>
->>>>>>> 939f032 (First Commit)
   );
 }
