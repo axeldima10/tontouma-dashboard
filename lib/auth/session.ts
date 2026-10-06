@@ -28,14 +28,29 @@ async function devSession(): Promise<Session> {
 async function clerkSession(): Promise<Session | null> {
   const { isAuthenticated, userId, orgId, orgRole, sessionClaims } = await auth();
   if (!isAuthenticated || !userId) return null;
-  const user = await currentUser();
+  // Identité affichée : lue dans le jeton si la claim `email` y est configurée (aucun appel réseau),
+  // sinon demandée à l'API Clerk.
+  const identity =
+    typeof sessionClaims?.email === "string"
+      ? {
+          name: sessionClaims.full_name ?? "",
+          firstName: sessionClaims.first_name ?? null,
+          email: sessionClaims.email,
+          imageUrl: sessionClaims.image_url ?? null,
+        }
+      : await currentUser().then((user) => ({
+          name: user?.fullName ?? "",
+          firstName: user?.firstName ?? null,
+          email: user?.primaryEmailAddress?.emailAddress ?? null,
+          imageUrl: user?.imageUrl ?? null,
+        }));
   return {
     mode: "clerk",
     userId,
-    name: user?.fullName ?? "",
-    firstName: user?.firstName?.trim() || null,
-    email: user?.primaryEmailAddress?.emailAddress ?? null,
-    imageUrl: user?.imageUrl ?? null,
+    name: identity.name,
+    firstName: identity.firstName?.trim() || null,
+    email: identity.email,
+    imageUrl: identity.imageUrl || null,
     orgId: orgId ?? null,
     orgName: null,
     orgRole: orgRole ?? null,

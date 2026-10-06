@@ -2,6 +2,13 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
+/* Dossiers hors application (skills d'agents, docs) : inutile d'y chercher des classes. */
+@source not "../.agents";
+@source not "../.claude";
+@source not "../.devin";
+@source not "../docs";
+@source not "../prompts";
+
 @custom-variant dark (&:where(.dark, .dark *));
 
 /* -------------------------------------------------------------------------- */
@@ -300,6 +307,14 @@
     );
   }
 }
+
+/* Révélation en cascade des enfants d'un `Stagger` (40 ms d'écart, plafonné). */
+.stagger > :nth-child(2) { animation-delay: 40ms; }
+.stagger > :nth-child(3) { animation-delay: 80ms; }
+.stagger > :nth-child(4) { animation-delay: 120ms; }
+.stagger > :nth-child(5) { animation-delay: 160ms; }
+.stagger > :nth-child(6) { animation-delay: 200ms; }
+.stagger > :nth-child(n + 7) { animation-delay: 240ms; }
 
 @keyframes shimmer {
   to {

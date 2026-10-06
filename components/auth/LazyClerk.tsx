@@ -21,7 +21,12 @@ export const LazyClerkUserButton = dynamic(() => import("./ClerkWidgets").then((
   loading: () => <span className="skeleton block size-9 rounded-full" />,
 });
 
-export const LazyClerkOrgSwitcher = dynamic(() => import("./ClerkWidgets").then((m) => m.ClerkOrgSwitcher), {
+export const LazyClerkSignOutButton = dynamic(() => import("./ClerkWidgets").then((m) => m.ClerkSignOutButton), {
+  ssr: false,
+  loading: () => <span className="skeleton block size-9 rounded-full" />,
+});
+
+export const LazyClerkOrgSwitcher =dynamic(() => import("./ClerkWidgets").then((m) => m.ClerkOrgSwitcher), {
   ssr: false,
   loading: () => <span className="skeleton block h-11 w-full rounded-2xl" />,
 });

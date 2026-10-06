@@ -5,7 +5,7 @@ import { AnimatePresence, motion } from "motion/react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Fragment, useId } from "react";
-import { LazyClerkOrgInfoBridge, LazyClerkOrgSwitcher, LazyClerkUserButton } from "@/components/auth/LazyClerk";
+import { LazyClerkOrgInfoBridge, LazyClerkOrgSwitcher, LazyClerkSignOutButton, LazyClerkUserButton } from "@/components/auth/LazyClerk";
 import { useSession } from "@/components/auth/SessionProvider";
 import { Avatar } from "@/components/ui/Avatar";
 import { Tip } from "@/components/ui/Menu";
@@ -204,7 +204,7 @@ function UserCard({ collapsed }: { collapsed: boolean }) {
   const role = session.isPlatformAdmin && !session.orgRole ? "Équipe Tontouma" : ROLE_LABELS[session.orgRole as OrgRole] ?? "Membre";
 
   return (
-    <div className={cn("flex items-center gap-3 rounded-2xl bg-card/70 p-2 shadow-[var(--card-shadow)]", collapsed && "justify-center bg-transparent p-0 shadow-none")}>
+    <div className={cn("flex items-center gap-3 rounded-2xl bg-card/70 p-2 shadow-[var(--card-shadow)]", collapsed && "flex-col justify-center gap-2 bg-transparent p-0 shadow-none")}>
       {session.mode === "clerk" ? <LazyClerkUserButton /> : <Avatar name={session.name} size={36} />}
       {!collapsed && (
         <>
@@ -213,6 +213,13 @@ function UserCard({ collapsed }: { collapsed: boolean }) {
             <p className="truncate text-[11px] text-muted-foreground">{role}</p>
           </div>
         </>
+      )}
+      {session.mode === "clerk" && (
+        <Tip content="Se déconnecter" side={collapsed ? "right" : "top"}>
+          <span className="inline-flex shrink-0">
+            <LazyClerkSignOutButton className="grid size-9 place-items-center rounded-full text-muted-foreground transition hover:bg-accent hover:text-foreground disabled:opacity-50" />
+          </span>
+        </Tip>
       )}
     </div>
   );

@@ -9,8 +9,9 @@ import { now, orgFor, scenario, store, uuid, type OrgData } from "./store";
  * (403 organisation suspendue, 404 hors périmètre, 409 quotas / doublons / références, 502 indexation).
  */
 
-const DELAY_MS = 120;
-const wait = () => new Promise((resolve) => setTimeout(resolve, DELAY_MS));
+/** Latence simulée (MOCK_DELAY_MS, 0 par défaut) : à augmenter pour observer les états de chargement. */
+const DELAY_MS = Math.max(0, Number(process.env.MOCK_DELAY_MS) || 0);
+const wait = () => (DELAY_MS ? new Promise((resolve) => setTimeout(resolve, DELAY_MS)) : Promise.resolve());
 
 async function read<T>(fn: () => T): Promise<T> {
   await wait();

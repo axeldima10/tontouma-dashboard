@@ -158,8 +158,8 @@ export function PlansManager({ plans, usage }: PlansManagerProps) {
                     <ul className="relative mt-6 space-y-2.5 text-sm">
                       {[...plan.features]
                         .sort((a, b) => a.displayOrder - b.displayOrder)
-                        .map((feature) => (
-                          <li key={feature.id} className="flex items-start gap-2.5">
+                        .map((feature, index) => (
+                          <li key={feature.id ?? index} className="flex items-start gap-2.5">
                             <span className={cn("mt-0.5 grid size-5 shrink-0 place-items-center rounded-full", featured ? "bg-brand text-on-brand" : "bg-brand-soft text-brand-ink")}>
                               <Check className="size-3" aria-hidden />
                             </span>

@@ -1,7 +1,8 @@
 "use client";
 
-import { animate, motion, MotionConfig, useInView, useReducedMotion, type HTMLMotionProps } from "motion/react";
-import { useEffect, useRef, type ReactNode } from "react";
+import { animate, MotionConfig, useInView, useReducedMotion } from "motion/react";
+import { useEffect, useRef, type ComponentProps, type ReactNode } from "react";
+import { cn } from "@/lib/cn";
 
 /** Respecte « réduire les animations » du système pour toutes les animations `motion`. */
 export function MotionProvider({ children }: { children: ReactNode }) {
@@ -10,43 +11,24 @@ export function MotionProvider({ children }: { children: ReactNode }) {
 
 const EASE = [0.16, 1, 0.3, 1] as const;
 
-/** Entrée de page : léger glissement vers le haut + fondu (ressort doux). */
+/*
+ * Entrées en CSS (tw-animate-css) : le contenu rendu par le serveur est visible sans attendre le JavaScript,
+ * et l'animation ne dépend pas de l'hydratation.
+ */
+const ENTER = "animate-in fade-in duration-300 ease-[var(--ease-out-expo)]";
+
+/** Entrée de page : léger glissement vers le haut + fondu. */
 export function PageTransition({ children }: { children: ReactNode }) {
-  return (
-    <motion.div initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.55, ease: EASE }}>
-      {children}
-    </motion.div>
-  );
+  return <div className={cn(ENTER, "slide-in-from-bottom-3")}>{children}</div>;
 }
 
-type StaggerProps = HTMLMotionProps<"div"> & { delay?: number; gap?: number };
-
-/** Conteneur qui révèle ses enfants `StaggerItem` l'un après l'autre. */
-export function Stagger({ children, delay = 0.05, gap = 0.06, ...props }: StaggerProps) {
-  return (
-    <motion.div
-      initial="hidden"
-      animate="show"
-      variants={{ hidden: {}, show: { transition: { staggerChildren: gap, delayChildren: delay } } }}
-      {...props}
-    >
-      {children}
-    </motion.div>
-  );
+/** Conteneur qui révèle ses enfants `StaggerItem` l'un après l'autre (délais dans globals.css). */
+export function Stagger({ className, ...props }: ComponentProps<"div">) {
+  return <div className={cn("stagger", className)} {...props} />;
 }
 
-export function StaggerItem({ children, ...props }: HTMLMotionProps<"div">) {
-  return (
-    <motion.div
-      variants={{
-        hidden: { opacity: 0, y: 16, scale: 0.985 },
-        show: { opacity: 1, y: 0, scale: 1, transition: { duration: 0.6, ease: EASE } },
-      }}
-      {...props}
-    >
-      {children}
-    </motion.div>
-  );
+export function StaggerItem({ className, ...props }: ComponentProps<"div">) {
+  return <div className={cn(ENTER, "slide-in-from-bottom-4 fill-mode-backwards", className)} {...props} />;
 }
 
 type CountUpProps = { value: number; /** Montant en FCFA (XOF, sans décimales). */ currency?: boolean; className?: string };

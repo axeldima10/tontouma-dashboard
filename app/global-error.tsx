@@ -1,13 +1,13 @@
 "use client";
 
-import * as Sentry from "@sentry/nextjs";
 import { useEffect } from "react";
+import { reportError } from "@/lib/observability/report";
 import "./globals.css";
 
 /** Dernier filet : erreur dans le layout racine. Remplace toute la page, donc il porte ses propres <html> et <body>. */
 export default function GlobalError({ error }: { error: Error & { digest?: string } }) {
   useEffect(() => {
-    Sentry.captureException(error);
+    reportError(error);
   }, [error]);
 
   return (

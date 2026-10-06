@@ -4,8 +4,9 @@
  * Tous les usages client de Clerk, regroupés pour être chargés à la demande (mode Clerk uniquement).
  * En mode dev, ce module n'est jamais téléchargé.
  */
-import { OrganizationList, OrganizationSwitcher, SignIn, UserButton, useAuth, useOrganization } from "@clerk/nextjs";
-import { useEffect, type ReactNode } from "react";
+import { OrganizationList, OrganizationSwitcher, SignIn, UserButton, useAuth, useClerk, useOrganization } from "@clerk/nextjs";
+import { LogOut } from "lucide-react";
+import { useEffect, useState, type ReactNode } from "react";
 
 export function ClerkSignIn() {
   return <SignIn />;
@@ -17,6 +18,26 @@ export function ClerkOrgList() {
 
 export function ClerkUserButton() {
   return <UserButton appearance={{ elements: { avatarBox: "size-9 ring-2 ring-white/70" } }} />;
+}
+
+/** Déconnexion directe, sans passer par le menu de l'avatar. */
+export function ClerkSignOutButton({ className }: { className?: string }) {
+  const { signOut } = useClerk();
+  const [pending, setPending] = useState(false);
+  return (
+    <button
+      type="button"
+      disabled={pending}
+      onClick={() => {
+        setPending(true);
+        void signOut({ redirectUrl: "/sign-in" }).catch(() => setPending(false));
+      }}
+      className={className}
+      aria-label="Se déconnecter"
+    >
+      <LogOut className="size-4" aria-hidden />
+    </button>
+  );
 }
 
 export function ClerkOrgSwitcher() {

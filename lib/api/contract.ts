@@ -8,6 +8,8 @@ import { z } from "zod";
 
 const str = z.string().nullish().transform((v) => v ?? null);
 const int = z.number().int().nullish().transform((v) => v ?? null);
+/** Les réponses de création / modification du backend omettent parfois les dates : on retombe sur l'heure de la réponse. */
+const timestamp = z.string().nullish().transform((v) => v ?? new Date().toISOString());
 
 /* --------------------------------- Communs --------------------------------- */
 
@@ -62,8 +64,8 @@ export const procedureSchema = z.object({
   processingDays: int,
   active: z.boolean(),
   requiredDocuments: z.array(requiredDocumentSchema).nullish().transform((v) => v ?? []),
-  createdAt: z.string(),
-  updatedAt: z.string(),
+  createdAt: timestamp,
+  updatedAt: timestamp,
 });
 export type Procedure = z.infer<typeof procedureSchema>;
 
@@ -88,8 +90,8 @@ export const departmentSchema = z.object({
   name: z.string(),
   description: str,
   active: z.boolean(),
-  createdAt: z.string(),
-  updatedAt: z.string(),
+  createdAt: timestamp,
+  updatedAt: timestamp,
 });
 export type Department = z.infer<typeof departmentSchema>;
 export type DepartmentRequest = { name: string; description: string | null };
@@ -106,8 +108,8 @@ export const serviceSchema = z.object({
   phone: str,
   openingHours: z.array(openingHoursSchema).nullish().transform((v) => v ?? []),
   active: z.boolean(),
-  createdAt: z.string(),
-  updatedAt: z.string(),
+  createdAt: timestamp,
+  updatedAt: timestamp,
 });
 export type Service = z.infer<typeof serviceSchema>;
 
@@ -132,8 +134,8 @@ export const documentSchema = z.object({
   category: str,
   active: z.boolean(),
   sourceProcedureId: str,
-  createdAt: z.string(),
-  updatedAt: z.string(),
+  createdAt: timestamp,
+  updatedAt: timestamp,
 });
 export type KnowledgeDocument = z.infer<typeof documentSchema>;
 
@@ -153,8 +155,8 @@ export const borneSchema = z.object({
   identifier: z.string(),
   location: str,
   status: z.enum(BORNE_STATUSES),
-  createdAt: z.string(),
-  updatedAt: z.string(),
+  createdAt: timestamp,
+  updatedAt: timestamp,
 });
 export type Borne = z.infer<typeof borneSchema>;
 
@@ -199,11 +201,11 @@ export const planSchema = z.object({
   maxAiDocuments: int,
   active: z.boolean(),
   features: z
-    .array(z.object({ id: z.string(), label: z.string(), displayOrder: z.number().int() }))
+    .array(z.object({ id: str, label: z.string(), displayOrder: z.number().int() }))
     .nullish()
     .transform((v) => v ?? []),
-  createdAt: z.string(),
-  updatedAt: z.string(),
+  createdAt: timestamp,
+  updatedAt: timestamp,
 });
 export type Plan = z.infer<typeof planSchema>;
 
@@ -247,8 +249,8 @@ export const organizationSchema = z.object({
   openingHours: z.array(openingHoursSchema).nullish().transform((v) => v ?? []),
   plan: z.object({ id: z.string(), name: z.string() }).nullish().transform((v) => v ?? null),
   active: z.boolean(),
-  createdAt: z.string(),
-  updatedAt: z.string(),
+  createdAt: timestamp,
+  updatedAt: timestamp,
 });
 export type Organization = z.infer<typeof organizationSchema>;
 
@@ -328,8 +330,8 @@ export const formSchema = z.object({
   description: str,
   active: z.boolean(),
   sections: z.array(sectionSchema).nullish().transform((v) => v ?? []),
-  createdAt: z.string(),
-  updatedAt: z.string(),
+  createdAt: timestamp,
+  updatedAt: timestamp,
 });
 export type Form = z.infer<typeof formSchema>;
 export type FormSection = Form["sections"][number];
@@ -413,7 +415,7 @@ export const chatMessageSchema = z.object({
   confidence: z.number().nullish().transform((v) => v ?? null),
   sources: z.array(sourceRefSchema).nullish().transform((v) => v ?? []),
   audioUrl: str,
-  createdAt: z.string(),
+  createdAt: timestamp,
 });
 export type ChatMessage = z.infer<typeof chatMessageSchema>;
 
