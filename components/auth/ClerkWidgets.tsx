@@ -7,6 +7,7 @@
 import { OrganizationList, OrganizationSwitcher, SignIn, UserButton, useAuth, useClerk, useOrganization } from "@clerk/nextjs";
 import { LogOut } from "lucide-react";
 import { useEffect, useState, type ReactNode } from "react";
+import { backendJwtTemplate } from "@/lib/auth/token";
 
 export function ClerkSignIn() {
   return <SignIn />;
@@ -71,7 +72,8 @@ export function ClerkOrgInfoBridge({ children }: { children: (info: ClerkOrgInfo
 export function ClerkTokenSource({ onReady }: { onReady: (getToken: () => Promise<string | null>) => void }) {
   const { getToken } = useAuth();
   useEffect(() => {
-    onReady(() => getToken());
+    const template = backendJwtTemplate();
+    onReady(() => getToken(template ? { template } : undefined));
   }, [getToken, onReady]);
   return null;
 }

@@ -9,6 +9,7 @@ import { StatusPill } from "@/components/ui/StatusPill";
 import type { Me } from "@/lib/api/contract";
 import type { ErrorDescription } from "@/lib/api/errors";
 import { ROLE_LABELS, type OrgRole } from "@/lib/auth/roles";
+import { backendJwtTemplate } from "@/lib/auth/token";
 import { cn } from "@/lib/cn";
 
 type Check = { label: string; state: "ok" | "ko" | "warn" | "na"; detail: string };
@@ -30,9 +31,10 @@ const ICONS = {
 /** Profil backend (`GET /me`) et vérification pas à pas de la configuration Clerk ↔ backend. */
 export function AccountView({ variant, session, me, demo }: AccountViewProps) {
   const roleKnown = session.orgRole === "org:super_admin" || session.orgRole === "org:admin";
+  const template = backendJwtTemplate();
   const checks: Check[] = [
     session.mode === "clerk"
-      ? { label: "Connexion Clerk", state: "ok", detail: "Session Clerk active : chaque appel au backend porte un jeton frais." }
+      ? { label: "Connexion Clerk", state: "ok", detail: `Session Clerk active : chaque appel au backend porte un jeton frais (${template ? `modèle « ${template} »` : "jeton de session standard"}).` }
       : { label: "Connexion Clerk", state: "warn", detail: "Mode développement (AUTH_MODE=dev) : utilisateurs fictifs, aucun jeton envoyé au backend." },
     variant === "org"
       ? session.orgId

@@ -2,9 +2,11 @@ import "server-only";
 import { auth, currentUser } from "@clerk/nextjs/server";
 import { cookies } from "next/headers";
 import { cache } from "react";
+import { ApiError } from "@/lib/api/errors";
 import { isDevAuth } from "./mode";
 import { DEV_ORG, PERSONA_COOKIE, PERSONAS, toPersonaId } from "./personas";
 import { isPlatformAdminClaims } from "./roles";
+import { backendJwtTemplate } from "./token";
 import type { Session } from "./types";
 
 async function devSession(): Promise<Session> {
@@ -68,5 +70,12 @@ export const getSession = cache(async (): Promise<Session | null> => {
 export async function getBackendToken(): Promise<string | null> {
   if (isDevAuth()) return null;
   const { getToken } = await auth();
-  return getToken();
+  const template = backendJwtTemplate();
+  if (!template) return getToken();
+  try {
+    return await getToken({ template });
+  } catch {
+    // Modèle inconnu de Clerk (nom erroné ou modèle supprimé) : on le dit clairement plutôt qu'une erreur brute.
+    throw new ApiError("unauthorized", `Clerk ne connaît pas le modèle de jeton « ${template} » (NEXT_PUBLIC_CLERK_JWT_TEMPLATE).`, 401);
+  }
 }
