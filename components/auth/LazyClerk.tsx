@@ -11,7 +11,17 @@ export const LazyClerkSignIn = dynamic(() => import("./ClerkWidgets").then((m) =
   loading: () => <span className="skeleton block h-[420px] w-full max-w-[400px] rounded-[1.2rem]" />,
 });
 
-export const LazyClerkOrgList = dynamic(() => import("./ClerkWidgets").then((m) => m.ClerkOrgList), {
+export const LazyClerkSignUp = dynamic(() => import("./ClerkWidgets").then((m) => m.ClerkSignUp), {
+  ssr: false,
+  loading: () => <span className="skeleton block h-[520px] w-full max-w-[400px] rounded-[1.2rem]" />,
+});
+
+export const LazyClerkInvitationSignIn = dynamic(() => import("./ClerkWidgets").then((m) => m.ClerkInvitationSignIn), {
+  ssr: false,
+  loading: () => <span className="skeleton block h-[420px] w-full max-w-[400px] rounded-[1.2rem]" />,
+});
+
+export const LazyClerkOrgList =dynamic(() => import("./ClerkWidgets").then((m) => m.ClerkOrgList), {
   ssr: false,
   loading: () => <span className="skeleton block h-40 w-80 rounded-2xl" />,
 });

@@ -4,13 +4,23 @@
  * Tous les usages client de Clerk, regroupés pour être chargés à la demande (mode Clerk uniquement).
  * En mode dev, ce module n'est jamais téléchargé.
  */
-import { OrganizationList, OrganizationSwitcher, SignIn, UserButton, useAuth, useClerk, useOrganization } from "@clerk/nextjs";
+import { OrganizationList, OrganizationSwitcher, SignIn, SignUp, UserButton, useAuth, useClerk, useOrganization } from "@clerk/nextjs";
 import { LogOut } from "lucide-react";
 import { useEffect, useState, type ReactNode } from "react";
 import { backendJwtTemplate } from "@/lib/auth/token";
 
 export function ClerkSignIn() {
   return <SignIn />;
+}
+
+/** Inscription sur invitation : le composant lit `__clerk_ticket` dans l'adresse. Routage `hash` car la page n'est pas une route attrape-tout. */
+export function ClerkSignUp() {
+  return <SignUp routing="hash" signInUrl="/sign-in" fallbackRedirectUrl="/dashboard" />;
+}
+
+/** Acceptation d'une invitation par un compte existant. */
+export function ClerkInvitationSignIn() {
+  return <SignIn routing="hash" fallbackRedirectUrl="/dashboard" />;
 }
 
 export function ClerkOrgList() {
